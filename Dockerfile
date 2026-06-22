@@ -7,6 +7,7 @@ WORKDIR /app
 
 COPY pyproject.toml README.md ./
 COPY src ./src
+COPY quests ./quests
 COPY alembic.ini ./
 COPY alembic ./alembic
 
