@@ -18,5 +18,103 @@
     "ai_validation": {
       "enabled": false
     }
+  },
+  {
+    "id": "say_pelmeni",
+    "enabled": true,
+    "difficulty": "easy",
+    "base_reward": 110,
+    "base_penalty": 55,
+    "requires_target": false,
+    "target_type": "none",
+    "title": "Ключевое слово",
+    "description_template": "Напиши в общий чат сообщение со словом «пельмени».",
+    "public_solution": "Игрок должен написать сообщение с ключевым словом «пельмени».",
+    "hint_text": "Квест связан с ключевым словом «пельмени».",
+    "validation": {
+      "type": "message_contains_text",
+      "text_contains_any": ["пельмени"]
+    },
+    "ai_validation": {
+      "enabled": false
+    }
+  },
+  {
+    "id": "reply_with_keyword",
+    "enabled": true,
+    "difficulty": "medium",
+    "base_reward": 250,
+    "base_penalty": 100,
+    "requires_target": false,
+    "target_type": "none",
+    "title": "Реплай с ключевым словом",
+    "description_template": "Сделай reply на любое сообщение и добавь слово «точно».",
+    "public_solution": "Игрок должен сделать reply и использовать слово «точно».",
+    "hint_text": "Квест связан с reply и словом «точно».",
+    "validation": {
+      "type": "reply_contains_text",
+      "must_be_reply": true,
+      "text_contains_any": ["точно"]
+    },
+    "ai_validation": {
+      "enabled": false
+    }
+  },
+  {
+    "id": "ask_and_get_response",
+    "enabled": true,
+    "difficulty": "medium",
+    "base_reward": 280,
+    "base_penalty": 110,
+    "requires_target": false,
+    "target_type": "none",
+    "title": "Спровоцируй ответ",
+    "description_template": "Задай вопрос в чате и добейся, чтобы тебе ответили по теме.",
+    "public_solution": "Игрок должен инициировать вопрос и получить осмысленный ответ от участников.",
+    "hint_text": "Квест связан с диалогом и получением ответа.",
+    "validation": {
+      "type": "custom_ai_check"
+    },
+    "ai_validation": {
+      "enabled": true
+    }
+  },
+  {
+    "id": "start_topic_thread",
+    "enabled": true,
+    "difficulty": "hard",
+    "base_reward": 600,
+    "base_penalty": 250,
+    "requires_target": false,
+    "target_type": "none",
+    "title": "Запусти обсуждение",
+    "description_template": "Подними новую тему и добейся цепочки минимум из 3 сообщений по теме.",
+    "public_solution": "Игрок должен инициировать тему и вовлечь участников в короткое обсуждение.",
+    "hint_text": "Квест связан с вовлечением других игроков в обсуждение.",
+    "validation": {
+      "type": "custom_ai_check"
+    },
+    "ai_validation": {
+      "enabled": true
+    }
+  },
+  {
+    "id": "creative_phrase",
+    "enabled": true,
+    "difficulty": "hard",
+    "base_reward": 650,
+    "base_penalty": 260,
+    "requires_target": false,
+    "target_type": "none",
+    "title": "Креативная формулировка",
+    "description_template": "Напиши необычную фразу, чтобы другие отреагировали и продолжили тему.",
+    "public_solution": "Игрок должен написать необычное сообщение, которое вызовет реакцию и продолжение беседы.",
+    "hint_text": "Квест связан с креативным сообщением и реакцией чата.",
+    "validation": {
+      "type": "custom_ai_check"
+    },
+    "ai_validation": {
+      "enabled": true
+    }
   }
 ]
