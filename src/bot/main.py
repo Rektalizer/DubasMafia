@@ -247,9 +247,10 @@ async def run() -> None:
     )
 
     logger.info(
-        "Starting bot in %s mode (group_chat_id=%s)",
+        "Starting bot in %s mode (group_chat_id=%s, configured_admin_ids=%s)",
         settings.game_mode.value,
         settings.group_chat_id,
+        len(settings.admin_user_ids),
     )
     startup_now = datetime.now(timezone)
     startup_report = await round_settlement_service.settle_if_due(now=startup_now)

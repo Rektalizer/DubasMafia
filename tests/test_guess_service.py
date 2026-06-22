@@ -40,6 +40,62 @@ class InMemoryPlayerRepo:
     async def list_active_with_private_chat(self) -> list[Player]:
         return []
 
+    async def apply_balance_change(self, telegram_user_id: int, amount: int, reason: str) -> Player | None:
+        del reason
+        player = self.players_by_id.get(telegram_user_id)
+        if player is None:
+            return None
+        updated = Player(
+            id=player.id,
+            telegram_user_id=player.telegram_user_id,
+            username=player.username,
+            first_name=player.first_name,
+            private_chat_id=player.private_chat_id,
+            balance_dub=player.balance_dub + amount,
+            shield_count=player.shield_count,
+            is_active=player.is_active,
+            is_admin=player.is_admin,
+        )
+        self.players_by_id[telegram_user_id] = updated
+        return updated
+
+    async def set_balance(self, telegram_user_id: int, new_balance: int, reason: str) -> Player | None:
+        del reason
+        player = self.players_by_id.get(telegram_user_id)
+        if player is None:
+            return None
+        updated = Player(
+            id=player.id,
+            telegram_user_id=player.telegram_user_id,
+            username=player.username,
+            first_name=player.first_name,
+            private_chat_id=player.private_chat_id,
+            balance_dub=new_balance,
+            shield_count=player.shield_count,
+            is_active=player.is_active,
+            is_admin=player.is_admin,
+        )
+        self.players_by_id[telegram_user_id] = updated
+        return updated
+
+    async def add_shield(self, telegram_user_id: int, delta: int) -> Player | None:
+        player = self.players_by_id.get(telegram_user_id)
+        if player is None:
+            return None
+        updated = Player(
+            id=player.id,
+            telegram_user_id=player.telegram_user_id,
+            username=player.username,
+            first_name=player.first_name,
+            private_chat_id=player.private_chat_id,
+            balance_dub=player.balance_dub,
+            shield_count=player.shield_count + delta,
+            is_active=player.is_active,
+            is_admin=player.is_admin,
+        )
+        self.players_by_id[telegram_user_id] = updated
+        return updated
+
 
 @dataclass
 class InMemoryDailyQuestRepo:
@@ -154,6 +210,8 @@ async def test_guess_reveals_quest_when_solution_matches() -> None:
     )
 
     assert "раскрыл квест" in text
+    assert "100 DUB" in text
+    assert players.players_by_id[1].balance_dub == 1100
 
 
 @pytest.mark.asyncio

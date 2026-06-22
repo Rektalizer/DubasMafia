@@ -149,7 +149,11 @@ def create_admin_router(
         username = f"@{message.from_user.username}" if message.from_user.username else "нет"
         is_admin = admin_command_service.is_admin(message.from_user.id)
         await message.answer(
-            f"user_id={message.from_user.id}\nusername={username}\nadmin={'yes' if is_admin else 'no'}"
+            "whoami\n"
+            f"user_id={message.from_user.id}\n"
+            f"username={username}\n"
+            f"admin={'yes' if is_admin else 'no'}\n"
+            f"configured_admin_ids={admin_command_service.admin_ids_count()}"
         )
 
     return router

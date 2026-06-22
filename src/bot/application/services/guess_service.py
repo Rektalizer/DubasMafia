@@ -1,10 +1,13 @@
 from datetime import datetime
+import logging
 
 from bot.application.ports.daily_quest_repository import DailyQuestRepository
 from bot.application.ports.player_repository import PlayerRepository
 from bot.application.ports.semantic_evaluator import SemanticEvaluator
 from bot.application.services.schedule_service import ScheduleService
 from bot.domain.player import Player
+
+logger = logging.getLogger(__name__)
 
 
 class GuessService:
@@ -70,6 +73,15 @@ class GuessService:
             public_solution=selected_option.public_solution,
             guess_text=guess_text,
         )
+        logger.info(
+            "Guess evaluation: guesser=%s target=%s matched=%s confidence=%.3f threshold=%.3f reason=%s",
+            guesser.telegram_user_id,
+            target.telegram_user_id,
+            evaluation.matched,
+            evaluation.confidence,
+            self._guess_confidence_threshold,
+            evaluation.reason,
+        )
         guessed = evaluation.matched and evaluation.confidence >= self._guess_confidence_threshold
         if not guessed:
             return f"Не похоже. Квест @{target.username or target.telegram_user_id} пока не раскрыт."
@@ -78,9 +90,15 @@ class GuessService:
             player_telegram_user_id=target.telegram_user_id,
             quest_date=window.offer_at.date(),
         )
+        reveal_reward = selected_option.base_reward
+        await self._player_repo.apply_balance_change(
+            telegram_user_id=guesser.telegram_user_id,
+            amount=reveal_reward,
+            reason="guess_reveal_reward",
+        )
         return (
             f"🕵️ @{guesser.username or guesser.telegram_user_id} раскрыл квест "
-            f"@{target.username or target.telegram_user_id}!"
+            f"@{target.username or target.telegram_user_id} и забирает {reveal_reward} DUB!"
         )
 
     async def _resolve_target_player(self, target_username: str) -> Player | None:

@@ -32,6 +32,9 @@ class AdminCommandService:
     def is_admin(self, user_id: int) -> bool:
         return user_id in self._admin_user_ids
 
+    def admin_ids_count(self) -> int:
+        return len(self._admin_user_ids)
+
     async def admin_send_quests_now(self, requester_user_id: int, offer_sender: OfferSender) -> str:
         if not self.is_admin(requester_user_id):
             return "Недостаточно прав для админ-команды."

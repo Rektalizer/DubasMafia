@@ -17,7 +17,7 @@ echo "==> Applying migrations"
 docker compose run --rm bot alembic upgrade head
 
 echo "==> Restarting bot"
-docker compose up -d bot
+docker compose up -d --force-recreate bot
 
 echo "==> Bot logs (last 80 lines)"
 docker compose logs --tail=80 bot
