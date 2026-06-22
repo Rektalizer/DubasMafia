@@ -1,7 +1,9 @@
+import logging
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from aiogram import F, Router
+from aiogram import Bot, F, Router
+from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
@@ -9,6 +11,8 @@ from bot.application.services.daily_quest_service import DailyQuestService
 from bot.application.services.quest_catalog_service import QuestCatalogService
 from bot.application.services.schedule_service import ScheduleService
 from bot.domain.quest import DailyQuestOffer, QuestDifficulty
+
+logger = logging.getLogger(__name__)
 
 
 def create_daily_quest_router(
@@ -81,17 +85,33 @@ def create_daily_quest_router(
             f"Возможная награда: {selected_option.base_reward} DUB\n"
             "Проверка будет в конце раунда."
         )
-        await callback.bot.send_message(
-            chat_id=group_chat_id,
-            text=(
-                f"🎭 @{callback.from_user.username or callback.from_user.id} принял секретный квест. "
-                f"Теперь его можно раскрыть через /guess @{callback.from_user.username or callback.from_user.id} "
-                "твоя догадка ."
-            ),
+        player_tag = callback.from_user.username or str(callback.from_user.id)
+        await send_group_quest_announcement(
+            bot=callback.bot,
+            group_chat_id=group_chat_id,
+            player_tag=player_tag,
         )
         await callback.answer("Квест выбран.")
 
     return router
+
+
+async def send_group_quest_announcement(*, bot: Bot, group_chat_id: int, player_tag: str) -> None:
+    if group_chat_id == 0:
+        logger.warning("Skipping quest announcement: GROUP_CHAT_ID is not configured")
+        return
+    text = (
+        f"🎭 @{player_tag} принял секретный квест. "
+        f"Теперь его можно раскрыть через /guess @{player_tag} твоя догадка ."
+    )
+    try:
+        await bot.send_message(chat_id=group_chat_id, text=text)
+    except (TelegramBadRequest, TelegramForbiddenError) as exc:
+        logger.warning(
+            "Failed to send quest announcement to group chat_id=%s: %s",
+            group_chat_id,
+            exc,
+        )
 
 
 def build_offer_text(offer: DailyQuestOffer) -> str:
