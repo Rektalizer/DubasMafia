@@ -1,4 +1,4 @@
-from aiogram import Router
+from aiogram import F, Router
 from aiogram.types import Message
 
 from bot.application.services.chat_message_service import ChatMessageService
@@ -8,7 +8,7 @@ from bot.domain.chat_message import ChatMessage
 def create_message_capture_router(chat_message_service: ChatMessageService) -> Router:
     router = Router(name="message_capture")
 
-    @router.message()
+    @router.message(~F.text.startswith("/"))
     async def capture_message(message: Message) -> None:
         if message.chat.type == "private":
             return

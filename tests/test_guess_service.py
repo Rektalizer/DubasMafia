@@ -154,3 +154,42 @@ async def test_guess_reveals_quest_when_solution_matches() -> None:
     )
 
     assert "раскрыл квест" in text
+
+
+@pytest.mark.asyncio
+async def test_guess_for_self_by_numeric_id_is_forbidden() -> None:
+    tz = ZoneInfo("Europe/Moscow")
+    schedule = ScheduleService(
+        config=GameScheduleConfig(
+            mode=GameMode.PRODUCTION,
+            timezone="Europe/Moscow",
+            offer_hour=8,
+            offer_minute=0,
+            check_hour=20,
+            check_minute=0,
+            test_round_duration_minutes=10,
+        )
+    )
+    players = InMemoryPlayerRepo(
+        players_by_id={
+            1: Player(1, 1, "guesser", "G", 101, 1000, 0, True, False),
+        }
+    )
+    offers = InMemoryDailyQuestRepo(offers={})
+    service = GuessService(
+        player_repo=players,
+        daily_quest_repo=offers,
+        schedule_service=schedule,
+        semantic_evaluator=StubSemanticEvaluator(),
+        guess_confidence_threshold=0.75,
+        test_round_anchor=None,
+    )
+
+    text = await service.process_guess(
+        guesser_telegram_user_id=1,
+        target_username="1",
+        guess_text="любой текст",
+        now=datetime(2026, 6, 22, 12, 0, tzinfo=tz),
+    )
+
+    assert text == "Нельзя угадывать свой квест."

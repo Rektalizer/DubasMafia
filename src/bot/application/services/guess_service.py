@@ -4,6 +4,7 @@ from bot.application.ports.daily_quest_repository import DailyQuestRepository
 from bot.application.ports.player_repository import PlayerRepository
 from bot.application.ports.semantic_evaluator import SemanticEvaluator
 from bot.application.services.schedule_service import ScheduleService
+from bot.domain.player import Player
 
 
 class GuessService:
@@ -34,7 +35,7 @@ class GuessService:
         if guesser is None:
             return "Сначала подключись к игре через /join."
 
-        target = await self._player_repo.get_by_username(target_username)
+        target = await self._resolve_target_player(target_username=target_username)
         if target is None:
             return "Этот игрок не участвует в игре."
         if target.telegram_user_id == guesser.telegram_user_id:
@@ -81,3 +82,8 @@ class GuessService:
             f"🕵️ @{guesser.username or guesser.telegram_user_id} раскрыл квест "
             f"@{target.username or target.telegram_user_id}!"
         )
+
+    async def _resolve_target_player(self, target_username: str) -> Player | None:
+        if target_username.isdigit():
+            return await self._player_repo.get_by_telegram_user_id(int(target_username))
+        return await self._player_repo.get_by_username(target_username)
