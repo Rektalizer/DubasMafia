@@ -26,6 +26,12 @@ Modular Telegram bot for the DUB Quest Game.
 
 - Start postgres + bot:
   - `docker compose up -d --build`
+- Deploy/update bot on server:
+  - `./bin/deploy.sh`
+- Quick bot restart + live logs:
+  - `./bin/restart.sh`
+- First time on Linux server, make scripts executable:
+  - `chmod +x bin/deploy.sh bin/restart.sh deploy.sh`
 
 ## CI
 
