@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from bot.domain.scheduling import GameMode, GameScheduleConfig
@@ -46,6 +46,19 @@ class Settings(BaseSettings):
             return []
         parts = [part.strip() for part in self.admin_user_ids_raw.split(",") if part.strip()]
         return [int(part) for part in parts]
+
+    @field_validator("group_chat_id", mode="before")
+    @classmethod
+    def normalize_group_chat_id(cls, value):  # type: ignore[no-untyped-def]
+        if value is None:
+            return 0
+        parsed = int(value)
+        if parsed == 0:
+            return 0
+        # Telegram group/supergroup IDs are negative for bots.
+        if parsed > 0:
+            return int(f"-100{parsed}")
+        return parsed
 
     def game_schedule_config(self) -> GameScheduleConfig:
         return GameScheduleConfig(

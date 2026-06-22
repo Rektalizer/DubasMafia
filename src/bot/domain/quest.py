@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime
 from enum import StrEnum
 
 
@@ -56,3 +56,4 @@ class DailyQuestOffer:
     selected_quest_id: str | None
     status: str
     double_active: bool = False
+    accepted_at: datetime | None = None

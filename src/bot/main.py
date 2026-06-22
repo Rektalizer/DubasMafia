@@ -6,6 +6,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from aiogram import Bot, Dispatcher
+from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 
 from bot.application.services.chat_message_service import ChatMessageService
 from bot.application.services.admin_command_service import AdminCommandService
@@ -71,7 +72,14 @@ async def run_offer_scheduler_loop(
         await scheduler_service.tick(now=now, offer_sender=offer_sender)
         settlement_report = await settlement_service.settle_if_due(now=now)
         if settlement_report:
-            await bot.send_message(chat_id=group_chat_id, text=settlement_report)
+            try:
+                await bot.send_message(chat_id=group_chat_id, text=settlement_report)
+            except (TelegramBadRequest, TelegramForbiddenError) as exc:
+                logger.warning(
+                    "Failed to send settlement report to group chat_id=%s: %s",
+                    group_chat_id,
+                    exc,
+                )
         await asyncio.sleep(15)
 
 
@@ -110,7 +118,25 @@ async def run() -> None:
         semantic_evaluator=semantic_evaluator,
         ai_confidence_threshold=settings.quest_ai_confidence_threshold,
     )
-    test_round_anchor = datetime.now(ZoneInfo(settings.timezone)) if settings.game_mode == GameMode.TEST else None
+    timezone = ZoneInfo(settings.timezone)
+    test_round_anchor = datetime.now(timezone) if settings.game_mode == GameMode.TEST else None
+    if settings.game_mode == GameMode.TEST:
+        now_local = datetime.now(timezone)
+        existing_today = await daily_quest_repo.list_by_date(now_local.date())
+        recovered_anchor = max(
+            (
+                offer.accepted_at.astimezone(timezone)
+                for offer in existing_today
+                if offer.status == "accepted" and offer.accepted_at is not None
+            ),
+            default=None,
+        )
+        if recovered_anchor is not None:
+            test_round_anchor = recovered_anchor
+            logger.warning(
+                "Recovered test round anchor from accepted quest at %s",
+                recovered_anchor.isoformat(),
+            )
     offer_scheduler_service = OfferSchedulerService(
         schedule_service=schedule_service,
         daily_quest_service=daily_quest_service,
@@ -173,7 +199,13 @@ async def run() -> None:
         test_round_anchor=test_round_anchor,
     )
     clock = SystemClock()
-    dispatcher.include_router(create_system_router(system_service=system_service, clock=clock))
+    dispatcher.include_router(
+        create_system_router(
+            system_service=system_service,
+            clock=clock,
+            test_round_anchor=test_round_anchor,
+        )
+    )
     dispatcher.include_router(create_player_router(player_service=player_service))
     dispatcher.include_router(
         create_daily_quest_router(
@@ -214,7 +246,22 @@ async def run() -> None:
         )
     )
 
-    logger.info("Starting bot in %s mode", settings.game_mode.value)
+    logger.info(
+        "Starting bot in %s mode (group_chat_id=%s)",
+        settings.game_mode.value,
+        settings.group_chat_id,
+    )
+    startup_now = datetime.now(timezone)
+    startup_report = await round_settlement_service.settle_if_due(now=startup_now)
+    if startup_report:
+        try:
+            await bot.send_message(chat_id=settings.group_chat_id, text=startup_report)
+        except (TelegramBadRequest, TelegramForbiddenError) as exc:
+            logger.warning(
+                "Failed to send startup settlement report to group chat_id=%s: %s",
+                settings.group_chat_id,
+                exc,
+            )
     scheduler_task = asyncio.create_task(
         run_offer_scheduler_loop(
             bot=bot,

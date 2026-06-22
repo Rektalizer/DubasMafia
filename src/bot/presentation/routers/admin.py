@@ -142,4 +142,14 @@ def create_admin_router(
         await message.bot.send_message(chat_id=group_chat_id, text=text)
         await message.answer("Сообщение отправлено в игровой чат.")
 
+    @router.message(Command("whoami"))
+    async def whoami_handler(message: Message) -> None:
+        if message.from_user is None:
+            return
+        username = f"@{message.from_user.username}" if message.from_user.username else "нет"
+        is_admin = admin_command_service.is_admin(message.from_user.id)
+        await message.answer(
+            f"user_id={message.from_user.id}\nusername={username}\nadmin={'yes' if is_admin else 'no'}"
+        )
+
     return router

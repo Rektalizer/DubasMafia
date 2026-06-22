@@ -33,6 +33,7 @@ class SQLAlchemyDailyQuestRepository:
                         selected_quest_id=offer.selected_quest_id,
                         status=offer.status,
                         double_active=offer.double_active,
+                        accepted_at=offer.accepted_at,
                     )
                 )
             else:
@@ -43,6 +44,7 @@ class SQLAlchemyDailyQuestRepository:
                 existing.selected_quest_id = offer.selected_quest_id
                 existing.status = offer.status
                 existing.double_active = offer.double_active
+                existing.accepted_at = offer.accepted_at
             await session.commit()
 
     async def get_offer(self, player_telegram_user_id: int, quest_date: date) -> DailyQuestOffer | None:
@@ -193,4 +195,5 @@ class SQLAlchemyDailyQuestRepository:
             selected_quest_id=model.selected_quest_id,
             status=model.status,
             double_active=model.double_active,
+            accepted_at=model.accepted_at,
         )

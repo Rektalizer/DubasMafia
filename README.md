@@ -44,6 +44,7 @@ Modular Telegram bot for the DUB Quest Game.
 - `/start` in private chat
 - `/wallet`
 - `/leaderboard`
+- `/time_left`
 - `/quests_now` in private chat (test/manual offer of 3 quests with inline pick)
 - `/guess @username текст` in group chat
 - `/shop`
@@ -62,6 +63,7 @@ Modular Telegram bot for the DUB Quest Game.
 - `/admin_take @user amount reason` (admins only)
 - `/admin_set_balance @user amount` (admins only)
 - `/admin_broadcast text` (admins only)
+- `/whoami` (shows your Telegram user id + admin flag)
 
 ## Current automation
 

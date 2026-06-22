@@ -18,3 +18,9 @@ def test_settings_parse_admin_user_ids_csv(monkeypatch) -> None:
     monkeypatch.setenv("ADMIN_USER_IDS", "1,2,300")
     settings = Settings()
     assert settings.admin_user_ids == [1, 2, 300]
+
+
+def test_settings_normalize_group_chat_id_from_positive(monkeypatch) -> None:
+    monkeypatch.setenv("GROUP_CHAT_ID", "4335937734")
+    settings = Settings()
+    assert settings.group_chat_id == -1004335937734
