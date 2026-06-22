@@ -1,0 +1,22 @@
+[
+  {
+    "id": "say_agree",
+    "enabled": true,
+    "difficulty": "easy",
+    "base_reward": 100,
+    "base_penalty": 50,
+    "requires_target": false,
+    "target_type": "none",
+    "title": "Слово в сообщении",
+    "description_template": "Напиши сообщение, где есть слово «согласен».",
+    "public_solution": "Игрок должен был написать сообщение со словом «согласен».",
+    "hint_text": "Квест связан с ключевым словом в обычном сообщении.",
+    "validation": {
+      "type": "message_contains_text",
+      "text_contains_any": ["согласен"]
+    },
+    "ai_validation": {
+      "enabled": false
+    }
+  }
+]
